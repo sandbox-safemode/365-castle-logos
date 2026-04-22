@@ -429,6 +429,16 @@ const LOGOS = [
   { id: 428, file: "castle_428_dune_muaddib_crimson.png", label: "Dune Muaddib Crimson" },
   { id: 429, file: "castle_429_dune_chani_rose.png", label: "Dune Chani Rose" },
   { id: 430, file: "castle_430_dune_god_emperor_ivory.png", label: "Dune God Emperor Ivory" },
+  { id: 431, file: "castle_431_moat_classic_navy.png", label: "Moat Classic Navy" },
+  { id: 432, file: "castle_432_moat_drawbridge_up_crimson.png", label: "Moat Drawbridge Up Crimson" },
+  { id: 433, file: "castle_433_moat_swan_sage.png", label: "Moat Swan Sage" },
+  { id: 434, file: "castle_434_moat_aerial_teal.png", label: "Moat Aerial Teal" },
+  { id: 435, file: "castle_435_moat_croc_amber.png", label: "Moat Croc Amber" },
+  { id: 436, file: "castle_436_moat_reflection_purple.png", label: "Moat Reflection Purple" },
+  { id: 437, file: "castle_437_moat_siege_charcoal.png", label: "Moat Siege Charcoal" },
+  { id: 438, file: "castle_438_moat_lily_emerald.png", label: "Moat Lily Emerald" },
+  { id: 439, file: "castle_439_moat_minimal_slate.png", label: "Moat Minimal Slate" },
+  { id: 440, file: "castle_440_moat_heraldic_burgundy.png", label: "Moat Heraldic Burgundy" },
 ];
 
 // ===== SUPABASE CONFIG =====
