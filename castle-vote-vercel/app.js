@@ -425,9 +425,8 @@ async function loadVotesFromSupabase() {
 }
 
 // ===== SUPABASE VOTE =====
-async function persistVote(id, dir) {
-  const v = votes[id];
-  const wasVote = v.userVote;
+async function persistVote(id, dir, wasVote) {
+  // wasVote = the userVote state BEFORE this click (passed from castVote)
   const isSameDir = wasVote === dir;
 
   try {
@@ -480,6 +479,8 @@ function castVote(id, dir) {
   voteInFlight.add(id);
 
   const v = votes[id];
+  const wasVote = v.userVote; // capture BEFORE mutation
+
   if (v.userVote === dir) {
     // toggle off
     v[dir]--;
@@ -491,8 +492,8 @@ function castVote(id, dir) {
   }
   updateStats();
 
-  // Persist to Supabase (fire and forget, optimistic UI already updated)
-  persistVote(id, dir).finally(() => voteInFlight.delete(id));
+  // Persist to Supabase — pass wasVote so persistVote knows the pre-click state
+  persistVote(id, dir, wasVote).finally(() => voteInFlight.delete(id));
 }
 
 // ===== SORT & FILTER =====
