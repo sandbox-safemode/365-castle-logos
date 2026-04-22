@@ -1337,8 +1337,8 @@ document.getElementById('edit-prompt-input').addEventListener('keydown', e => {
   if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) submitEdit();
 });
 
-// Quick prompt buttons
-document.querySelectorAll('.edit-quick-btn').forEach(btn => {
+// Quick prompt buttons — edit modal
+document.querySelectorAll('#edit-modal .edit-quick-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.getElementById('edit-prompt-input').value = btn.dataset.prompt;
     document.getElementById('edit-prompt-input').focus();
@@ -1347,10 +1347,152 @@ document.querySelectorAll('.edit-quick-btn').forEach(btn => {
 
 // Close edit modal on Escape
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && !document.getElementById('edit-modal').hidden) {
-    closeEditModal();
-  }
+  if (e.key === 'Escape' && !document.getElementById('edit-modal').hidden) closeEditModal();
+  if (e.key === 'Escape' && !document.getElementById('create-modal').hidden) closeCreateModal();
 });
+
+// ===== CREATE NEW FEATURE =====
+const VERCEL_CREATE_API = '/api/create';
+
+function openCreateModal() {
+  const DEFAULT_PROMPT = 'Flat single-color castle logo for SANDBOX EVERYTHING, neon cyan on white background, clean vector silhouette style, no gradients';
+  document.getElementById('create-prompt-input').value = DEFAULT_PROMPT;
+  document.getElementById('create-status').hidden = true;
+  document.getElementById('create-generate-btn').disabled = false;
+  document.getElementById('create-modal').hidden = false;
+  document.getElementById('create-modal-backdrop').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  const ta = document.getElementById('create-prompt-input');
+  ta.focus();
+  ta.select();
+}
+
+function closeCreateModal() {
+  document.getElementById('create-modal').hidden = true;
+  document.getElementById('create-modal-backdrop').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+async function submitCreate() {
+  const prompt = document.getElementById('create-prompt-input').value.trim();
+  if (!prompt) {
+    document.getElementById('create-prompt-input').focus();
+    return;
+  }
+
+  const btn = document.getElementById('create-generate-btn');
+  const statusEl = document.getElementById('create-status');
+  btn.disabled = true;
+  statusEl.hidden = false;
+  statusEl.className = 'edit-status';
+  statusEl.innerHTML = '<span class="spinner"></span> Generating with nano banana pro… (may take ~30s)';
+
+  try {
+    const res = await fetch(VERCEL_CREATE_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId: SESSION_ID, prompt }),
+    });
+
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || 'Generation failed');
+
+    const jobId = data.jobId;
+
+    // Fetch the full row from Supabase and render as a standalone created card
+    const { data: row } = await sb
+      .from('castle_edits')
+      .select('id, parent_logo_id, prompt, image_data_url, up_votes, down_votes, status')
+      .eq('id', jobId)
+      .single();
+
+    closeCreateModal();
+
+    if (row && row.image_data_url) {
+      editCards[row.id] = {
+        id: row.id,
+        parentId: row.parent_logo_id || null,
+        prompt: row.prompt,
+        imageDataUrl: row.image_data_url,
+        up: row.up_votes || 0,
+        down: row.down_votes || 0,
+        userVote: null,
+        status: 'done',
+        isCreated: true,
+      };
+      renderCreatedCard(editCards[row.id]);
+    }
+  } catch (err) {
+    statusEl.className = 'edit-status error';
+    statusEl.innerHTML = `✕ ${err.message}`;
+    btn.disabled = false;
+  }
+}
+
+function renderCreatedCard(edit) {
+  // Created cards go at the very top of the grid
+  const existingCard = document.getElementById(`edit-card-${edit.id}`);
+  if (existingCard) return;
+
+  const card = createEditCard(edit);
+  // Override the AI badge text for created cards
+  const badge = card.querySelector('.ai-badge');
+  if (badge) badge.textContent = '✦ Created';
+
+  const grid = document.getElementById('logo-grid');
+  grid.prepend(card);
+}
+
+// Quick prompt buttons — create modal
+document.querySelectorAll('#create-modal .edit-quick-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.getElementById('create-prompt-input').value = btn.dataset.createPrompt;
+    document.getElementById('create-prompt-input').focus();
+  });
+});
+
+document.getElementById('create-new-btn').addEventListener('click', openCreateModal);
+document.getElementById('create-modal-close').addEventListener('click', closeCreateModal);
+document.getElementById('create-modal-backdrop').addEventListener('click', closeCreateModal);
+document.getElementById('create-generate-btn').addEventListener('click', submitCreate);
+document.getElementById('create-prompt-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) submitCreate();
+});
+
+// Also load created-type edits (parent_logo_id IS NULL) on init
+async function loadCreatedFromSupabase() {
+  try {
+    const { data } = await sb
+      .from('castle_edits')
+      .select('id, parent_logo_id, prompt, image_data_url, up_votes, down_votes, status')
+      .eq('status', 'done')
+      .is('parent_logo_id', null)
+      .order('created_at', { ascending: false });
+
+    (data || []).forEach(e => {
+      if (!e.image_data_url) return;
+      editCards[e.id] = {
+        id: e.id,
+        parentId: null,
+        prompt: e.prompt,
+        imageDataUrl: e.image_data_url,
+        up: e.up_votes || 0,
+        down: e.down_votes || 0,
+        userVote: null,
+        status: 'done',
+        isCreated: true,
+      };
+    });
+
+    // Render after LOGOS grid is populated
+    if (Object.values(editCards).some(e => e.isCreated)) {
+      Object.values(editCards).filter(e => e.isCreated).forEach(renderCreatedCard);
+    }
+  } catch (err) {
+    console.warn('Failed to load created logos:', err);
+  }
+}
 
 // ===== LOAD EDITS ON INIT =====
 loadEditsFromSupabase();
+loadCreatedFromSupabase();

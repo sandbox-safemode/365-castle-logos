@@ -45,6 +45,10 @@
           <div class="filter-wrap">
             <input type="search" class="search-input" placeholder="Search styles…" aria-label="Search logos" />
           </div>
+          <button class="create-new-btn" id="create-new-btn" aria-label="Create a new logo">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+            Create New
+          </button>
           <button class="theme-toggle" data-theme-toggle aria-label="Toggle dark mode">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
           </button>
@@ -131,6 +135,40 @@
     </div>
   </div>
   <div class="edit-modal-backdrop" id="edit-modal-backdrop"></div>
+
+  <!-- ===== CREATE NEW MODAL ===== -->
+  <div class="edit-modal create-modal" id="create-modal" role="dialog" aria-modal="true" aria-label="Create New Logo" hidden>
+    <div class="edit-modal-inner">
+      <button class="edit-modal-close" id="create-modal-close" aria-label="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+      <div class="create-modal-body">
+        <div class="create-modal-heading">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          <p class="edit-modal-label">Create with <strong>nano banana pro</strong></p>
+        </div>
+        <p class="create-modal-hint">Describe any castle logo and AI will generate it. It appears in the grid alongside all other logos so everyone can vote on it.</p>
+        <textarea
+          class="edit-prompt-input create-prompt-input"
+          id="create-prompt-input"
+          rows="4"
+          placeholder="Describe your castle logo…"
+        ></textarea>
+        <div class="edit-modal-actions">
+          <button class="edit-quick-btn" data-create-prompt="Flat single-color castle logo for SANDBOX EVERYTHING, neon cyan on white background, clean vector silhouette style">✦ SANDBOX Neon</button>
+          <button class="edit-quick-btn" data-create-prompt="SANDBOX EVERYTHING castle logo, dark mode, purple glowing fortress with circuit board details, minimal flat style">✦ SANDBOX Dark</button>
+          <button class="edit-quick-btn" data-create-prompt="SANDBOX EVERYTHING castle logo, retro pixel art style, 8-bit castle in bright colors on white background">✦ SANDBOX Pixel</button>
+          <button class="edit-quick-btn" data-create-prompt="SANDBOX EVERYTHING logo, castle made of sandcastle on a beach, fun playful colorful illustration style">✦ SANDBOX Beach</button>
+        </div>
+        <button class="edit-generate-btn" id="create-generate-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          Generate Logo
+        </button>
+        <div class="edit-status" id="create-status" hidden></div>
+      </div>
+    </div>
+  </div>
+  <div class="edit-modal-backdrop" id="create-modal-backdrop"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="app.js"></script>
