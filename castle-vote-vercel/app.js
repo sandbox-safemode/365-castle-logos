@@ -414,6 +414,21 @@ const LOGOS = [
   { id: 413, file: "castle_413_sw_kashyyyk_jade.png", label: "SW Kashyyyk Jade" },
   { id: 414, file: "castle_414_sw_republic_indigo.png", label: "SW Republic Indigo" },
   { id: 415, file: "castle_415_sw_droid_factory_copper.png", label: "SW Droid Factory Copper" },
+  { id: 416, file: "castle_416_sw_tatooine_sand.png", label: "SW Tatooine Sand" },
+  { id: 417, file: "castle_417_dune_arrakis_spice.png", label: "Dune Arrakis Spice" },
+  { id: 418, file: "castle_418_dune_atreides_blue.png", label: "Dune Atreides Blue" },
+  { id: 419, file: "castle_419_dune_harkonnen_black.png", label: "Dune Harkonnen Black" },
+  { id: 420, file: "castle_420_dune_fremen_sietch.png", label: "Dune Fremen Sietch" },
+  { id: 421, file: "castle_421_dune_emperor_silver.png", label: "Dune Emperor Silver" },
+  { id: 422, file: "castle_422_dune_bene_gesserit_violet.png", label: "Dune Bene Gesserit Violet" },
+  { id: 423, file: "castle_423_dune_guild_teal.png", label: "Dune Guild Navigator Teal" },
+  { id: 424, file: "castle_424_dune_sandworm_russet.png", label: "Dune Sandworm Russet" },
+  { id: 425, file: "castle_425_dune_spice_gold.png", label: "Dune Spice Gold" },
+  { id: 426, file: "castle_426_dune_tleilaxu_green.png", label: "Dune Tleilaxu Green" },
+  { id: 427, file: "castle_427_dune_ixian_chrome.png", label: "Dune Ixian Chrome" },
+  { id: 428, file: "castle_428_dune_muaddib_crimson.png", label: "Dune Muaddib Crimson" },
+  { id: 429, file: "castle_429_dune_chani_rose.png", label: "Dune Chani Rose" },
+  { id: 430, file: "castle_430_dune_god_emperor_ivory.png", label: "Dune God Emperor Ivory" },
 ];
 
 // ===== SUPABASE CONFIG =====
