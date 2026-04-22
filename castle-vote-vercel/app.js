@@ -439,6 +439,18 @@ const LOGOS = [
   { id: 438, file: "castle_438_moat_lily_emerald.png", label: "Moat Lily Emerald" },
   { id: 439, file: "castle_439_moat_minimal_slate.png", label: "Moat Minimal Slate" },
   { id: 440, file: "castle_440_moat_heraldic_burgundy.png", label: "Moat Heraldic Burgundy" },
+  { id: 441, file: "castle_441_got_winterfell_grey.png", label: "GoT Winterfell" },
+  { id: 442, file: "castle_442_got_red_keep_crimson.png", label: "GoT Red Keep" },
+  { id: 443, file: "castle_443_got_eyrie_blue.png", label: "GoT The Eyrie" },
+  { id: 444, file: "castle_444_got_dragonstone_charcoal.png", label: "GoT Dragonstone" },
+  { id: 445, file: "castle_445_got_casterly_rock_gold.png", label: "GoT Casterly Rock" },
+  { id: 446, file: "castle_446_got_harrenhal_black.png", label: "GoT Harrenhal" },
+  { id: 447, file: "castle_447_got_storms_end_teal.png", label: "GoT Storm's End" },
+  { id: 448, file: "castle_448_got_highgarden_green.png", label: "GoT Highgarden" },
+  { id: 449, file: "castle_449_got_the_wall_ice.png", label: "GoT The Wall" },
+  { id: 450, file: "castle_450_got_pyke_slate.png", label: "GoT Pyke" },
+  { id: 451, file: "castle_451_got_sunspear_amber.png", label: "GoT Sunspear" },
+  { id: 452, file: "castle_452_got_twins_violet.png", label: "GoT The Twins" },
 ];
 
 // ===== SUPABASE CONFIG =====
