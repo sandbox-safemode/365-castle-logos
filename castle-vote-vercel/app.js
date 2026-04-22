@@ -366,15 +366,100 @@ const LOGOS = [
   { id: 365, file: "castle_365_the_perfect_final.png", label: "The Perfect Final" },
 ];
 
+// ===== SUPABASE CONFIG =====
+const SUPABASE_URL = 'https://mrnccntqmkxjazznejfc.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ybmNjbnRxbWt4amF6em5lamZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyMDA3NTksImV4cCI6MjA5MDc3Njc1OX0.T6oFTtYiFTsx6ojuogpZFXAS7tN5-dPzwvmY5V2xFGI';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Session ID — fresh each page load (avoids localStorage sandbox issues)
+const SESSION_ID = crypto.randomUUID();
+
 // ===== STATE =====
 let votes = {}; // { id: { up: 0, down: 0, userVote: null } }
 let sortMode = 'votes';
 let searchQuery = '';
 let lightboxId = null;
 let filteredIds = [];
+let voteInFlight = new Set(); // prevent double-clicks
 
 // Init vote state for all logos
 LOGOS.forEach(l => { votes[l.id] = { up: 0, down: 0, userVote: null }; });
+
+// ===== SUPABASE LOAD =====
+async function loadVotesFromSupabase() {
+  try {
+    // Load aggregate counts
+    const { data: aggData, error: aggErr } = await sb
+      .from('castle_votes')
+      .select('logo_id, up_votes, down_votes');
+
+    if (aggErr) throw aggErr;
+
+    aggData.forEach(row => {
+      if (votes[row.logo_id]) {
+        votes[row.logo_id].up = row.up_votes || 0;
+        votes[row.logo_id].down = row.down_votes || 0;
+      }
+    });
+
+    // Load this session's votes
+    const { data: userVoteData, error: userErr } = await sb
+      .from('castle_user_votes')
+      .select('logo_id, direction')
+      .eq('session_id', SESSION_ID);
+
+    if (userErr) throw userErr;
+
+    userVoteData.forEach(row => {
+      if (votes[row.logo_id]) {
+        votes[row.logo_id].userVote = row.direction;
+      }
+    });
+
+  } catch (err) {
+    console.warn('Supabase load error (falling back to local):', err.message);
+  }
+
+  render();
+  updateStats();
+}
+
+// ===== SUPABASE VOTE =====
+async function persistVote(id, dir) {
+  const v = votes[id];
+  const wasVote = v.userVote;
+  const isSameDir = wasVote === dir;
+
+  try {
+    if (isSameDir) {
+      // Toggle off: delete user vote row, decrement count
+      await sb
+        .from('castle_user_votes')
+        .delete()
+        .eq('logo_id', id)
+        .eq('session_id', SESSION_ID);
+
+      await sb.rpc('adjust_votes', { p_logo_id: id, p_up_delta: dir === 'up' ? -1 : 0, p_down_delta: dir === 'down' ? -1 : 0 });
+
+    } else {
+      // Upsert user vote (insert or update direction)
+      await sb
+        .from('castle_user_votes')
+        .upsert(
+          { logo_id: id, session_id: SESSION_ID, direction: dir },
+          { onConflict: 'logo_id,session_id' }
+        );
+
+      // Adjust counts: +1 for new dir, -1 for old dir if existed
+      const upDelta = (dir === 'up' ? 1 : 0) + (wasVote === 'up' ? -1 : 0);
+      const downDelta = (dir === 'down' ? 1 : 0) + (wasVote === 'down' ? -1 : 0);
+
+      await sb.rpc('adjust_votes', { p_logo_id: id, p_up_delta: upDelta, p_down_delta: downDelta });
+    }
+  } catch (err) {
+    console.warn('Supabase vote error:', err.message);
+  }
+}
 
 // ===== VOTE HELPERS =====
 function getScore(id) {
@@ -391,6 +476,9 @@ function getControversy(id) {
 }
 
 function castVote(id, dir) {
+  if (voteInFlight.has(id)) return; // debounce
+  voteInFlight.add(id);
+
   const v = votes[id];
   if (v.userVote === dir) {
     // toggle off
@@ -402,6 +490,9 @@ function castVote(id, dir) {
     v.userVote = dir;
   }
   updateStats();
+
+  // Persist to Supabase (fire and forget, optimistic UI already updated)
+  persistVote(id, dir).finally(() => voteInFlight.delete(id));
 }
 
 // ===== SORT & FILTER =====
@@ -730,6 +821,8 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// ===== INITIAL RENDER =====
+// ===== INIT =====
+// Show a placeholder render immediately, then load real data from Supabase
 render();
 updateStats();
+loadVotesFromSupabase();
