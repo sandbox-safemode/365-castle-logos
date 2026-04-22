@@ -641,6 +641,16 @@ function render() {
       if (badge) badge.textContent = `#${idx + 1}`;
     }
   });
+
+  // Re-render any AI edit/created cards that were wiped by grid.innerHTML = ''
+  if (typeof renderEditCards === 'function') renderEditCards();
+  if (typeof renderCreatedCards === 'function') renderCreatedCards();
+}
+
+function renderCreatedCards() {
+  Object.values(editCards)
+    .filter(e => e.isCreated && e.status === 'done' && e.imageDataUrl)
+    .forEach(renderCreatedCard);
 }
 
 function createCard(logo, idx) {
@@ -910,12 +920,6 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// ===== INIT =====
-// Show a placeholder render immediately, then load real data from Supabase
-render();
-updateStats();
-loadVotesFromSupabase();
-
 // =====================================================================
 // ===== AI EDIT FEATURE =====
 // =====================================================================
@@ -927,6 +931,12 @@ let editCards = {};
 
 // Poll handles: { editId -> intervalId }
 let editPolls = {};
+
+// ===== INIT =====
+// Show a placeholder render immediately, then load real data from Supabase
+render();
+updateStats();
+loadVotesFromSupabase();
 
 // ===== LOAD EXISTING EDITS FROM SUPABASE =====
 async function loadEditsFromSupabase() {
